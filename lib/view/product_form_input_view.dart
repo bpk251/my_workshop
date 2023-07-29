@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:my_workshop/provider/product_provider.dart';
+import 'package:provider/provider.dart';
 
 class ProductFormInputView extends StatefulWidget {
   const ProductFormInputView({Key? key}) : super(key: key);
@@ -9,10 +11,23 @@ class ProductFormInputView extends StatefulWidget {
 
 class _ProductFormInputViewState extends State<ProductFormInputView> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  TextEditingController nameController =TextEditingController();
-  TextEditingController descController =TextEditingController();
-  TextEditingController priceController =TextEditingController();
-  TextEditingController imageController =TextEditingController();
+  TextEditingController nameController = TextEditingController();
+  TextEditingController descController = TextEditingController();
+  TextEditingController priceController = TextEditingController();
+  TextEditingController imageController = TextEditingController();
+
+  @override
+  void initState() {
+    var productSelected = context.read<ProductProvider>().productSelected;
+    if (productSelected != null) {
+      nameController.text = productSelected.name ?? "";
+      descController.text = productSelected.description ?? "";
+      priceController.text = productSelected.price.toString();
+      imageController.text = productSelected.imageUrl ?? "";
+    }
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -104,7 +119,28 @@ class _ProductFormInputViewState extends State<ProductFormInputView> {
                   height: 55,
                   width: MediaQuery.of(context).size.width,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: _formKey.currentState?.validate() == true
+                        ? () async {
+                            var productSelected = context.read<ProductProvider>().productSelected;
+                            if (productSelected != null) {
+                              await context.read<ProductProvider>().updateProducts(
+                                    id: productSelected.id!,
+                                    name: nameController.text,
+                                    desc: descController.text,
+                                    price: priceController.text,
+                                    image: imageController.text,
+                                  );
+                            } else {
+                              await context.read<ProductProvider>().addProducts(
+                                    name: nameController.text,
+                                    desc: descController.text,
+                                    price: priceController.text,
+                                    image: imageController.text,
+                                  );
+                            }
+                            Navigator.pop(context);
+                          }
+                        : null,
                     child: Text("Save"),
                   ),
                 )

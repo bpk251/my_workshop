@@ -1,7 +1,13 @@
 import 'package:awesome_bottom_bar/awesome_bottom_bar.dart';
 import 'package:awesome_bottom_bar/widgets/inspired/inspired.dart';
 import 'package:flutter/material.dart';
+import 'package:my_workshop/provider/product_provider.dart';
+import 'package:my_workshop/service/api_service.dart';
 import 'package:my_workshop/view/home_view.dart';
+import 'package:my_workshop/view/map_example.dart';
+import 'package:my_workshop/view/pick_image_view.dart';
+import 'package:my_workshop/view/product_form_input_view.dart';
+import 'package:provider/provider.dart';
 
 class AppView extends StatefulWidget {
   const AppView({Key? key}) : super(key: key);
@@ -28,12 +34,22 @@ class _AppViewState extends State<AppView> {
 
   List<Widget> pages = [
     HomeView(),
-    Text("Page2"),
-    Text("Page3"),
+    PickImageView(),
+    MapSample(),
   ];
 
   int visit = 0;
   final GlobalKey<ScaffoldState> _key = GlobalKey();
+
+  initialData() async {
+    await context.read<ProductProvider>().getProducts();
+  }
+
+  @override
+  void initState() {
+    initialData();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +64,12 @@ class _AppViewState extends State<AppView> {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProductFormInputView(),
+              ),
+            ),
             icon: Icon(
               Icons.add,
               color: Colors.deepOrangeAccent,
